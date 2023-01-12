@@ -1,0 +1,19 @@
+.auth-main {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.auth-form-wrap {
+    margin: auto;
+    width: 100%;
+}
+
+.auth-form-wrap {
+    max-width: 400px;
+}
+
+.custom-label {
+    font-weight: 600;
+}
