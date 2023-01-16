@@ -72,8 +72,9 @@ export default function Login() {
       <main className="auth-main">
         <section className="auth-form-wrap">
           <h1 className="fw-700 text-center mb-4">Login</h1>
-          <pre>{JSON.stringify(formData, null, 2)}</pre>
-          <pre>{JSON.stringify(errorMessages, null, 2)}</pre>
+
+          <pre>Input Data: {JSON.stringify(formData, null, 2)}</pre>
+          <pre>Errors: {JSON.stringify(errorMessages, null, 2)}</pre>
           <Form onSubmit={handleFormSubmit} className="w-100">
             <FormGroup
               id={"emailControl"}
