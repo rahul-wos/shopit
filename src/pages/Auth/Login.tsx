@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button, Form, Toast, ToastContainer } from "react-bootstrap";
 import { emailRegex } from "./../../constants/constants";
 import { FormGroup } from "@/components/FormGroup/FormGroup";
+import { Toaster, toast } from "react-hot-toast";
 import "./Auth.css";
 
 interface FormData {
@@ -10,27 +11,28 @@ interface FormData {
 }
 
 export default function Login() {
-  const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errorMessages, setErrorMessages] = useState({
     email: "",
     password: "",
   });
 
-  const handleInputsChange = (e: React.FormEvent) => {
+  const handleInputChange = (e: React.FormEvent) => {
     let { name, value } = e.target as HTMLInputElement;
-    setFormData({ ...formData, [name]: value });
+    setFormData((data) => ({ ...data, [name]: value }));
+
+    setErrorMessages(validate(formData));
+
+    const noErrors = Object.values(errorMessages).every((x) => x === null || x === "");
+    noErrors && toast.success("Logged In Successfully!");
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessages(validate(formData));
+    // setErrorMessages(validate(formData));
 
-    if (Object.keys(errorMessages.length === 0)) {
-      console.log("NO");
-    } else {
-      setShowSuccessToast(true);
-    }
+    // const noErrors = Object.values(errorMessages).every((x) => x === null || x === "");
+    // noErrors && toast.success("Logged In Successfully!");
   };
 
   const validate = (data: FormData) => {
@@ -38,6 +40,8 @@ export default function Login() {
 
     if (!emailRegex.test(data.email)) {
       errors.email = "Please enter a valid email address";
+    } else {
+      errors.email = "";
     }
 
     if (!data.email) {
@@ -46,10 +50,14 @@ export default function Login() {
 
     if (data.password.length <= 6) {
       errors.password = "Password should be more than 6 characters long";
+    } else {
+      errors.email = "Email should not be empty";
     }
 
-    if (data.password.length > 20) {
+    if (data.password.length >= 20) {
       errors.password = "Password should be less than 20 characters long";
+    } else {
+      errors.email = "Email should not be empty";
     }
 
     if (!data.password) {
@@ -59,25 +67,13 @@ export default function Login() {
     return errors;
   };
 
-  const SuccessToast = () => {
-    return (
-      <ToastContainer position="top-center">
-        <Toast
-          show={showSuccessToast}
-          onClose={() => setShowSuccessToast(false)}
-          delay={1500}
-        >
-          <Toast.Body>Logged in successfully!</Toast.Body>
-        </Toast>
-      </ToastContainer>
-    );
-  };
-
   return (
     <>
       <main className="auth-main">
         <section className="auth-form-wrap">
-          <h1 className="fw-700">Login</h1>
+          <h1 className="fw-700 text-center mb-4">Login</h1>
+          <pre>{JSON.stringify(formData, null, 2)}</pre>
+          <pre>{JSON.stringify(errorMessages, null, 2)}</pre>
           <Form onSubmit={handleFormSubmit} className="w-100">
             <FormGroup
               id={"emailControl"}
@@ -87,7 +83,8 @@ export default function Login() {
               errorMessage={errorMessages.email}
               label={"Email address"}
               placeholder="reallycool@email.com"
-              onChange={handleInputsChange}
+              parentClassName={"mb-3"}
+              onChange={handleInputChange}
             />
 
             <FormGroup
@@ -98,16 +95,17 @@ export default function Login() {
               errorMessage={errorMessages.password}
               label={"Password"}
               placeholder="Should be 6-20 characters long"
-              onChange={handleInputsChange}
+              parentClassName={"mb-5"}
+              onChange={handleInputChange}
             />
 
-            <Button type="submit" className="mt-3">
+            <Button type="submit" className="mx-auto d-flex">
               Login
             </Button>
           </Form>
         </section>
       </main>
-      <SuccessToast />
+      <Toaster />
     </>
   );
 }

@@ -30,18 +30,20 @@ export function FormGroup({
   onChange,
 }: FormGroupProps) {
   return (
-    <Form.Group className="mb-3" controlId={id}>
-      <Form.Label className="custom-label">{label}</Form.Label>
+    <Form.Group className={`${parentClassName}`} controlId={id}>
+      <Form.Label className={`custom-label ${labelClassName}`}>{label}</Form.Label>
       <Form.Control
         type={type}
         placeholder={placeholder}
         name={name}
         value={value}
         onChange={onChange}
+        className={controlClassName}
       />
-      <Form.Text className={`text-danger fw-500 ${errorClassName}`}>
-        {errorMessage}
-      </Form.Text>
+
+      {errorMessage.length !== 0 ? (
+        <Form.Text className={`text-danger fw-500 ${errorClassName}`}>{errorMessage}</Form.Text>
+      ) : null}
     </Form.Group>
   );
 }
