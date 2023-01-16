@@ -4,6 +4,7 @@ import { emailRegex } from "./../../constants/constants";
 import { FormGroup } from "@/components/FormGroup/FormGroup";
 import { Toaster, toast } from "react-hot-toast";
 import "./Auth.css";
+import { Link } from "react-router-dom";
 
 interface FormData {
   email: string;
@@ -104,6 +105,10 @@ export default function Login() {
               Login
             </Button>
           </Form>
+
+          <p className="text-center d-block mt-3">
+            Don't have an account? <Link to={"/sign-up"}>Sign Up here</Link>
+          </p>
         </section>
       </main>
       <Toaster />
