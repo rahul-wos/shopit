@@ -41,9 +41,9 @@ export function FormGroup({
         className={controlClassName}
       />
 
-      {errorMessage.length !== 0 ? (
+      {/* {errorMessage.length !== 0 ? (
         <Form.Text className={`text-danger fw-500 ${errorClassName}`}>{errorMessage}</Form.Text>
-      ) : null}
+      ) : null} */}
     </Form.Group>
   );
 }

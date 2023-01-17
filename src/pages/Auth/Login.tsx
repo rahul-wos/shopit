@@ -1,71 +1,94 @@
-import React, { useState } from "react";
-import { Button, Form, Toast, ToastContainer } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Button, Form } from "react-bootstrap";
 import { emailRegex } from "./../../constants/constants";
 import { FormGroup } from "@/components/FormGroup/FormGroup";
 import { Toaster, toast } from "react-hot-toast";
-import "./Auth.css";
 import { Link } from "react-router-dom";
+import { useInitialRenderSkip } from "@/hooks/useInitialRenderSkip";
+import "./Auth.css";
 
 interface FormData {
-  email: string;
-  password: string;
+  email: {
+    value: string;
+    error: string;
+  };
+  password: {
+    value: string;
+    error: string;
+  };
 }
 
 export default function Login() {
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [errorMessages, setErrorMessages] = useState({
-    email: "",
-    password: "",
+  const firstMount = useInitialRenderSkip();
+  const [formData, setFormData] = useState({
+    email: { value: "", error: "" },
+    password: { value: "", error: "" },
   });
 
+  useEffect(() => {
+    !firstMount && handleErrorMessages();
+  }, [formData.email.value, formData.password.value]);
+
+  const handleErrorMessages = () => {
+    console.log(formData);
+    setFormData({
+      ...formData,
+      email: { ...formData.email, error: validate(formData, "email") },
+      password: { ...formData.password, error: validate(formData, "password") },
+    });
+  };
+
   const handleInputChange = (e: React.FormEvent) => {
-    let { name, value } = e.target as HTMLInputElement;
-    setFormData((data) => ({ ...data, [name]: value }));
-
-    setErrorMessages(validate(formData));
-
-    const noErrors = Object.values(errorMessages).every((x) => x === null || x === "");
-    noErrors && toast.success("Logged In Successfully!");
+    const { name, value } = e.target as HTMLInputElement;
+    setFormData((data) => {
+      return {
+        ...data,
+        [name]: {
+          ...data.password,
+          value: value,
+        },
+      };
+    });
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // setErrorMessages(validate(formData));
+
+    console.log("Form Submitted!");
 
     // const noErrors = Object.values(errorMessages).every((x) => x === null || x === "");
     // noErrors && toast.success("Logged In Successfully!");
   };
 
-  const validate = (data: FormData) => {
-    let errors = { email: "", password: "" };
+  const validate = (data: FormData, type: string) => {
+    if (type === "email") {
+      let emailError;
+      if (!emailRegex.test(data.email.value)) {
+        emailError = "Please enter a valid email address";
+      }
 
-    if (!emailRegex.test(data.email)) {
-      errors.email = "Please enter a valid email address";
-    } else {
-      errors.email = "";
+      if (!data.email.value) {
+        emailError = "Email should not be empty";
+      }
+
+      return emailError;
+    } else if (type === "password") {
+      let passwordError;
+
+      if (!data.password) {
+        passwordError = "Password should not be empty";
+      }
+
+      if (data.password.value.length <= 6) {
+        passwordError = "Password should be more than 6 characters long";
+      }
+
+      if (data.password.value.length >= 20) {
+        passwordError = "Password should be less than 20 characters long";
+      }
+      return passwordError;
     }
-
-    if (!data.email) {
-      errors.email = "Email should not be empty";
-    }
-
-    if (data.password.length <= 6) {
-      errors.password = "Password should be more than 6 characters long";
-    } else {
-      errors.email = "Email should not be empty";
-    }
-
-    if (data.password.length >= 20) {
-      errors.password = "Password should be less than 20 characters long";
-    } else {
-      errors.email = "Email should not be empty";
-    }
-
-    if (!data.password) {
-      errors.password = "Password should not be empty";
-    }
-
-    return errors;
+    return "";
   };
 
   return (
@@ -75,14 +98,14 @@ export default function Login() {
           <h1 className="fw-700 text-center mb-4">Login</h1>
 
           <pre>Input Data: {JSON.stringify(formData, null, 2)}</pre>
-          <pre>Errors: {JSON.stringify(errorMessages, null, 2)}</pre>
+          {/* <pre>Errors: {JSON.stringify(errorMessages, null, 2)}</pre> */}
           <Form onSubmit={handleFormSubmit} className="w-100">
             <FormGroup
               id={"emailControl"}
               type={"text"}
-              value={formData.email}
+              value={formData.email.value}
               name="email"
-              errorMessage={errorMessages.email}
+              errorMessage={formData.email.error}
               label={"Email address"}
               placeholder="reallycool@email.com"
               parentClassName={"mb-3"}
@@ -92,9 +115,9 @@ export default function Login() {
             <FormGroup
               id={"passwordControl"}
               type={"password"}
-              value={formData.password}
+              value={formData.password.value}
               name="password"
-              errorMessage={errorMessages.password}
+              errorMessage={formData.password.error}
               label={"Password"}
               placeholder="Should be 6-20 characters long"
               parentClassName={"mb-5"}
@@ -107,7 +130,7 @@ export default function Login() {
           </Form>
 
           <p className="text-center d-block mt-3">
-            Don't have an account? <Link to={"/sign-up"}>Sign Up here</Link>
+            Don&apos;t have an account? <Link to={"/sign-up"}>Sign Up here</Link>
           </p>
         </section>
       </main>
