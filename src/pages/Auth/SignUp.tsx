@@ -5,8 +5,8 @@ import { useForm } from "react-hook-form";
 import { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
 import * as Yup from "yup";
-import { DBContext } from "@/contexts/UsersContext";
-import { useContext } from "react";
+import { useEffect } from "react";
+import useLocalStorage from "@/hooks/useLocalStorage";
 
 interface SignUpDetails {
   firstName: string;
@@ -36,14 +36,26 @@ export default function SignUp() {
     defaultValues: { firstName: "", lastName: "", email: "", password: "", confirmPassword: "" },
     resolver: yupResolver(signUpSchema),
   });
+  const [db, setDB] = useLocalStorage("database");
+
+  useEffect(() => {
+    console.log(db);
+  }, [db]);
 
   const handleFormSubmit = handleSubmit((data) => {
-    const newUser = {
-      firstName: data.firstName,
-      lastName: data.lastName,
-      email: data.lastName,
-      password: data.password,
-    };
+    if (!db) {
+      setDB([]);
+    }
+
+    const newUser = JSON.parse(JSON.stringify(data));
+    const emailExists = db.some((user) => user.email === newUser.email);
+
+    const tempNew = JSON.parse(JSON.stringify(data));
+    delete tempNew.confirmPassword;
+    if (!emailExists) {
+      db.push(tempNew);
+      setDB(tempNew);
+    }
   });
 
   return (
