@@ -36,7 +36,7 @@ export default function SignUp() {
     defaultValues: { firstName: "", lastName: "", email: "", password: "", confirmPassword: "" },
     resolver: yupResolver(signUpSchema),
   });
-  const [db, setDB] = useLocalStorage("database");
+  const [db, setDB] = useLocalStorage("database", [{ firstName: "", lastName: "", email: "", password: "" }]);
 
   useEffect(() => {
     console.log(db);
