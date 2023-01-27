@@ -12,16 +12,41 @@ interface FormGroupProps {
   placeholder?: string;
   name: string;
   error: string | undefined;
+  autoComplete?: string;
 }
 
 const FormGroup = forwardRef<HTMLInputElement, FormGroupProps>(
-  ({ errorClassName, parentClassName, labelClassName, label, id, controlClassName, error, ...props }, ref) => {
+  (
+    {
+      id,
+      label,
+      error,
+      autoComplete,
+      labelClassName,
+      errorClassName,
+      parentClassName,
+      controlClassName,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <Form.Group className={`${parentClassName}`} controlId={id}>
-        <Form.Label className={`custom-label ${labelClassName}`}>{label}</Form.Label>
-        <Form.Control className={controlClassName} ref={ref} {...props} />
+        <Form.Label className={`custom-label ${labelClassName}`}>
+          {label}
+        </Form.Label>
+        <Form.Control
+          ref={ref}
+          autoComplete={autoComplete}
+          className={controlClassName}
+          {...props}
+        />
 
-        {error?.length !== 0 ? <Form.Text className={`text-danger fw-500 ${errorClassName}`}>{error}</Form.Text> : null}
+        {error?.length !== 0 ? (
+          <Form.Text className={`text-danger fw-500 ${errorClassName}`}>
+            {error}
+          </Form.Text>
+        ) : null}
       </Form.Group>
     );
   }
