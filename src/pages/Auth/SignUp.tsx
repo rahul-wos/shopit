@@ -6,7 +6,7 @@ import { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
 import * as Yup from "yup";
 import { useEffect } from "react";
-import useLocalStorage from "@/hooks/useLocalStorage";
+import { useDB } from "@/contexts/DBContext";
 
 interface SignUpDetails {
   firstName: string;
@@ -36,7 +36,7 @@ export default function SignUp() {
     defaultValues: { firstName: "", lastName: "", email: "", password: "", confirmPassword: "" },
     resolver: yupResolver(signUpSchema),
   });
-  const [db, setDB] = useLocalStorage("database", [{ firstName: "", lastName: "", email: "", password: "" }]);
+  const { db, setDB } = useDB();
 
   useEffect(() => {
     console.log(db);

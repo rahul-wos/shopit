@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import "./App.css";
+import UsersProvider from "./contexts/DBContext";
 
 interface User {
   firstName: string;
@@ -22,15 +23,17 @@ export const setDB = (data: User) => {
 
 function App() {
   return (
-    <div className="App">
-      <Router>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/sign-up" element={<SignUp />} />
-        </Routes>
-      </Router>
-    </div>
+    <UsersProvider>
+      <div className="App">
+        <Router>
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/sign-up" element={<SignUp />} />
+          </Routes>
+        </Router>
+      </div>
+    </UsersProvider>
   );
 }
 
