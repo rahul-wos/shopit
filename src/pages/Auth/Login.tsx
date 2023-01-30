@@ -1,10 +1,11 @@
+import * as Yup from "yup";
 import { Button, Form } from "react-bootstrap";
 import { FormGroup } from "@/components/CustomInput/CustomInput";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as Yup from "yup";
+import { useDB } from "@/contexts/DBContext";
 import "./Auth.css";
 
 interface LoginInfo {
@@ -21,9 +22,12 @@ const loginSchema = Yup.object().shape({
 });
 
 export default function Login() {
+  const { db } = useDB();
+
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<LoginInfo>({
     defaultValues: { email: "", password: "" },
@@ -31,7 +35,16 @@ export default function Login() {
   });
 
   const handleFormSubmit = handleSubmit((data) => {
-    console.log("Form Submitted", data);
+    const emailExists = db.some((item) => item.email === data.email);
+    const wrongPassword = db.some((item) => item.email === data.email && item.password !== data.password);
+
+    if (!emailExists) {
+      setError("email", { message: "Account does not exists!" });
+    } else if (wrongPassword) {
+      setError("password", { message: "Incorrect Password!" }, { shouldFocus: true });
+    } else {
+      toast.success("Login Successful");
+    }
   });
 
   return (

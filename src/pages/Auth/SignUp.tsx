@@ -2,11 +2,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Button, Form } from "react-bootstrap";
 import { FormGroup } from "@/components/CustomInput/CustomInput";
 import { useForm } from "react-hook-form";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
-import * as Yup from "yup";
 import { useEffect } from "react";
 import { useDB } from "@/contexts/DBContext";
+import * as Yup from "yup";
 
 interface SignUpDetails {
   firstName: string;
@@ -16,24 +16,32 @@ interface SignUpDetails {
   confirmPassword: string;
 }
 
-const signUpSchema = Yup.object().shape({
-  firstName: Yup.string().required("First Name should not be empty"),
-  lastName: Yup.string().required("Last Name should not be empty"),
-  email: Yup.string().required("Email should not be empty").email("Please enter a valid email address"),
-  password: Yup.string()
-    .required("Password should not be empty")
-    .min(6, "Password should be more than 6 characters in length")
-    .max(20, "Password should be less than 20 characters in length"),
-  confirmPassword: Yup.string().oneOf([Yup.ref("password"), null], "Passwords do not match"),
-});
-
 export default function SignUp() {
+  const signUpSchema = Yup.object().shape({
+    firstName: Yup.string().required("First Name should not be empty"),
+    lastName: Yup.string().required("Last Name should not be empty"),
+    email: Yup.string().required("Email should not be empty").email("Please enter a valid email address"),
+    password: Yup.string()
+      .required("Password should not be empty")
+      .min(6, "Password should be more than 6 characters in length")
+      .max(20, "Password should be less than 20 characters in length"),
+    confirmPassword: Yup.string().oneOf([Yup.ref("password"), null], "Passwords do not match"),
+  });
+
   const {
     register,
     handleSubmit,
+    setError,
+    reset,
     formState: { errors },
   } = useForm<SignUpDetails>({
-    defaultValues: { firstName: "", lastName: "", email: "", password: "", confirmPassword: "" },
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
     resolver: yupResolver(signUpSchema),
   });
   const { db, setDB } = useDB();
@@ -47,14 +55,23 @@ export default function SignUp() {
       setDB([]);
     }
 
-    const newUser = JSON.parse(JSON.stringify(data));
-    const emailExists = db.some((user) => user.email === newUser.email);
+    const newUser = {
+      id: Date.now(),
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email.toLowerCase(),
+      password: data.password,
+    };
 
-    const tempNew = JSON.parse(JSON.stringify(data));
-    delete tempNew.confirmPassword;
-    if (!emailExists) {
-      db.push(tempNew);
-      setDB(tempNew);
+    const emailExists = db.some((item) => item.email === data.email);
+
+    if (emailExists) {
+      setError("email", { message: "Email Already Exists" }, { shouldFocus: true });
+    } else {
+      db.push(newUser);
+      setDB(db);
+      toast.success("Account created successfully!");
+      reset();
     }
   });
 
@@ -72,6 +89,7 @@ export default function SignUp() {
               placeholder="Arthur"
               parentClassName={"mb-3"}
               error={errors.firstName?.message}
+              autoComplete={"off"}
               {...register("firstName")}
             />
 
@@ -82,6 +100,7 @@ export default function SignUp() {
               placeholder="Morgan"
               parentClassName={"mb-3"}
               error={errors.lastName?.message}
+              autoComplete={"off"}
               {...register("lastName")}
             />
 
@@ -92,6 +111,7 @@ export default function SignUp() {
               placeholder="arthurmorgan@email.com"
               parentClassName={"mb-3"}
               error={errors.email?.message}
+              autoComplete={"on"}
               {...register("email")}
             />
 
@@ -102,6 +122,7 @@ export default function SignUp() {
               placeholder="Password should be 6-20 characters long"
               parentClassName={"mb-3"}
               error={errors.password?.message}
+              autoComplete={"off"}
               {...register("password")}
             />
 
@@ -112,6 +133,7 @@ export default function SignUp() {
               placeholder="Confirm Password"
               parentClassName={"mb-5"}
               error={errors.confirmPassword?.message}
+              autoComplete={"off"}
               {...register("confirmPassword")}
             />
 
