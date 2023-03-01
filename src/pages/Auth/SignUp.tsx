@@ -4,10 +4,23 @@ import { FormGroup } from "@/components/CustomInput/CustomInput";
 import { useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
-import { useDB } from "@/contexts/DBContext";
+import { useEffect, useState } from "react";
 import * as Yup from "yup";
+import axios from "axios";
+import bcrypt from "bcryptjs";
 
+interface User {
+  name: {
+    first: string;
+    last: string;
+  };
+  email: string;
+  password: string;
+}
+
+interface DBUser extends User {
+  id: number;
+}
 interface SignUpDetails {
   firstName: string;
   lastName: string;
@@ -17,6 +30,8 @@ interface SignUpDetails {
 }
 
 export default function SignUp() {
+  const [usersList, setUsersList] = useState<DBUser[]>([]);
+
   const signUpSchema = Yup.object().shape({
     firstName: Yup.string().required("First Name should not be empty"),
     lastName: Yup.string().required("Last Name should not be empty"),
@@ -44,34 +59,54 @@ export default function SignUp() {
     },
     resolver: yupResolver(signUpSchema),
   });
-  const { db, setDB } = useDB();
+
+  const getUsersList = async () => {
+    try {
+      const res = await axios.get("http://localhost:3010/users");
+      const data = await res.data;
+      setUsersList(data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const setUserInList = async (user: User) => {
+    try {
+      await axios.post("http://localhost:3010/users", user);
+      getUsersList();
+      toast.success("Account created successfully!");
+      reset();
+      return true;
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   useEffect(() => {
-    console.log(db);
-  }, [db]);
+    getUsersList();
+  }, []);
 
   const handleFormSubmit = handleSubmit((data) => {
-    if (!db) {
-      setDB([]);
-    }
+    const salt = bcrypt.genSaltSync();
+    const hashedPassword = bcrypt.hashSync(data.password, salt);
+
+    console.log(`Password: ${data.password}, Salt: ${salt}, Hashed: ${hashedPassword}`);
 
     const newUser = {
-      id: Date.now(),
-      firstName: data.firstName,
-      lastName: data.lastName,
+      name: {
+        first: data.firstName,
+        last: data.lastName,
+      },
       email: data.email.toLowerCase(),
-      password: data.password,
+      password: hashedPassword,
     };
 
-    const emailExists = db.some((item) => item.email === data.email);
+    const emailExists = usersList.some((item) => item.email === data.email);
 
     if (emailExists) {
       setError("email", { message: "Email Already Exists" }, { shouldFocus: true });
     } else {
-      db.push(newUser);
-      setDB(db);
-      toast.success("Account created successfully!");
-      reset();
+      setUserInList(newUser);
     }
   });
 

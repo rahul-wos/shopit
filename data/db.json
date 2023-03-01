@@ -1,0 +1,49 @@
+{
+  "users": [
+    {
+      "name": {
+        "first": "Urshita",
+        "last": "Kahar"
+      },
+      "email": "ukahar@gmail.com",
+      "password": "$2a$10$44aPD6868vT91C9V.qRTj.C.VVviRkQRZm5aNenWBm0Sp34CyxOOC",
+      "id": 1
+    },
+    {
+      "name": {
+        "first": "Rahul",
+        "last": "Patil"
+      },
+      "email": "rahulp@gmail.com",
+      "password": "$2a$10$Mv2xw7xMyrbrMC2U/tfuger4kfSADKHv0dJ5FOB6tLvK7qF.wFcLu",
+      "id": 2
+    },
+    {
+      "name": {
+        "first": "Vivek",
+        "last": "Jariwala"
+      },
+      "email": "vivekj@gmail.com",
+      "password": "$2a$10$9xpJzp9YM.S1IgQ0fQ4vvutgCWA4UFs2KyJ1M97xn45IrTcQukLS.",
+      "id": 3
+    },
+    {
+      "name": {
+        "first": "Mansi",
+        "last": "Bariya"
+      },
+      "email": "mansib@gmail.com",
+      "password": "$2a$10$PMvDOCtkXL3y99xuprkkIuNTrf.ZXikF31GzSeW7TIgmxw0GjSZqu",
+      "id": 4
+    },
+    {
+      "name": {
+        "first": "Sampath",
+        "last": "Bingi"
+      },
+      "email": "sambingi@gmail.com",
+      "password": "$2a$10$g43sy57PGbQihY2kausrO.WOwyqn1vEW86wXUR7XxOPq.3NaMwQJK",
+      "id": 5
+    }
+  ]
+}

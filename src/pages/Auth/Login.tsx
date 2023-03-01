@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import * as Yup from "yup";
 import { Button, Form } from "react-bootstrap";
 import { FormGroup } from "@/components/CustomInput/CustomInput";
@@ -5,10 +6,21 @@ import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useDB } from "@/contexts/DBContext";
+import axios from "axios";
+import bcrypt from "bcryptjs";
 import "./Auth.css";
 
 interface LoginInfo {
+  email: string;
+  password: string;
+}
+
+interface User {
+  id: number;
+  name: {
+    first: string;
+    last: string;
+  };
   email: string;
   password: string;
 }
@@ -22,7 +34,21 @@ const loginSchema = Yup.object().shape({
 });
 
 export default function Login() {
-  const { db } = useDB();
+  const [usersList, setUsersList] = useState<User[]>([]);
+
+  const getUsersList = async () => {
+    try {
+      const res = await axios.get("http://localhost:3010/users");
+      const data = await res.data;
+      setUsersList(data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    getUsersList();
+  }, []);
 
   const {
     register,
@@ -35,12 +61,23 @@ export default function Login() {
   });
 
   const handleFormSubmit = handleSubmit((data) => {
-    const emailExists = db.some((item) => item.email === data.email);
-    const wrongPassword = db.some((item) => item.email === data.email && item.password !== data.password);
+    const checkUser = (item: User) => {
+      const { email, password } = item;
+      const doesPasswordMatch = bcrypt.compareSync(data.password, password);
+
+      if (email === data.email && doesPasswordMatch) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+
+    const emailExists = usersList.some((item) => item.email === data.email);
+    const isCorrectPassword = usersList.some((item) => checkUser(item));
 
     if (!emailExists) {
       setError("email", { message: "Account does not exists!" });
-    } else if (wrongPassword) {
+    } else if (!isCorrectPassword) {
       setError("password", { message: "Incorrect Password!" }, { shouldFocus: true });
     } else {
       toast.success("Login Successful");
@@ -52,7 +89,7 @@ export default function Login() {
       <main className="auth-main">
         <section className="auth-form-wrap">
           <h1 className="fw-700 text-center mb-4">Login</h1>
-
+    
           <Form className="w-100" onSubmit={handleFormSubmit}>
             <FormGroup
               id={"emailControl"}
